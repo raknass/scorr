@@ -1,24 +1,10 @@
--- ============================================================
--- Update Lesson 1 concept note to the full, rich version
--- Run once in Supabase SQL Editor
--- ============================================================
-
-DO $outer$
-DECLARE
-  v_subject_id UUID;
-  v_unit_id    UUID;
-  v_lesson_id  UUID;
-  v_note       TEXT;
-BEGIN
-
-SELECT id INTO v_subject_id FROM subjects WHERE slug = 'ap-physics-1';
-SELECT id INTO v_unit_id    FROM units    WHERE subject_id = v_subject_id AND order_num = 1;
-SELECT id INTO v_lesson_id  FROM lessons  WHERE unit_id = v_unit_id AND order_num = 1;
-
-v_note := $note$# Position, Displacement & Distance
+# Position, Displacement & Distance
 **AP Physics 1 — Unit 1: Kinematics | College Board Topic 1.A**
+*Estimated time: 15 minutes | XP reward: 20*
 
-Kinematics is the study of how things move — not *why* they move (that's Newton's job), but how we describe and measure motion.
+---
+
+## What this lesson covers
 
 By the end of this lesson you will be able to:
 - Define position, distance, and displacement correctly
@@ -145,12 +131,11 @@ Answer these without looking:
 ---
 
 That's it for this lesson. Simple — but the foundation for everything in Unit 1.
-$note$;
 
-UPDATE lessons
-SET concept_note = v_note
-WHERE id = v_lesson_id;
+---
 
-RAISE NOTICE 'Updated lesson 1 concept note (id = %)', v_lesson_id;
+## Connection to Other Lessons
 
-END $outer$;
+- **Lesson 2:** Velocity uses displacement ($\Delta x$), not distance — same scalar/vector distinction applies
+- **Lesson 4:** Kinematic equations use displacement ($\Delta x$) as the position variable
+- **Lesson 5:** Projectile motion tracks separate displacements in $x$ and $y$ directions
