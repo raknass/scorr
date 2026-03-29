@@ -16,9 +16,9 @@ export default function HomePage() {
           <nav className="hidden items-center gap-8 md:flex">
             <a href="#" className="text-sm text-gray-600 hover:text-[#0F172A]">Features</a>
             <a href="#" className="text-sm text-gray-600 hover:text-[#0F172A]">Pricing</a>
-            <a href="#" className="text-sm text-gray-600 hover:text-[#0F172A]">Free Trial</a>
+            <a href="/auth/sign-in" className="text-sm text-gray-600 hover:text-[#0F172A]">Sign In</a>
             <a
-              href="#"
+              href="/auth/sign-up"
               className="rounded-lg bg-[#0D9488] px-6 py-3 text-sm font-semibold text-white hover:bg-teal-700"
             >
               Start Free
@@ -48,7 +48,7 @@ export default function HomePage() {
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a
-              href="#"
+              href="/auth/sign-up"
               className="rounded-lg bg-[#0D9488] px-6 py-3 font-semibold text-white hover:bg-teal-700"
             >
               Start Free Trial
@@ -243,7 +243,7 @@ export default function HomePage() {
                 ))}
               </ul>
               <a
-                href="#"
+                href="/auth/sign-up"
                 className="mt-8 block w-full rounded-lg border border-gray-300 px-6 py-3 text-center font-semibold text-[#0F172A] hover:bg-gray-50"
               >
                 Start Free
@@ -274,7 +274,7 @@ export default function HomePage() {
                 ))}
               </ul>
               <a
-                href="#"
+                href="/auth/sign-up"
                 className="mt-8 block w-full rounded-lg bg-[#0D9488] px-6 py-3 text-center font-semibold text-white hover:bg-teal-700"
               >
                 Start Free Trial
@@ -299,7 +299,7 @@ export default function HomePage() {
                 ))}
               </ul>
               <a
-                href="#"
+                href="/auth/sign-up"
                 className="mt-8 block w-full rounded-lg border border-gray-300 px-6 py-3 text-center font-semibold text-[#0F172A] hover:bg-gray-50"
               >
                 Start Free Trial
@@ -471,7 +471,7 @@ export default function HomePage() {
             Join thousands of AP students who stopped guessing and started scoring.
           </p>
           <a
-            href="#"
+            href="/auth/sign-up"
             className="mt-8 inline-block rounded-lg bg-[#0D9488] px-8 py-4 text-lg font-semibold text-white hover:bg-teal-600"
           >
             Start Free — No Credit Card
