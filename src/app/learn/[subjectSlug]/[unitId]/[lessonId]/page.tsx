@@ -8,7 +8,7 @@ interface Props {
 }
 
 export default async function LessonPage({ params }: Props) {
-  const { lessonId } = await params
+  const { subjectSlug, unitId, lessonId } = await params
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -27,10 +27,25 @@ export default async function LessonPage({ params }: Props) {
     )
   }
 
+  // Find the next lesson in the same unit
+  const { data: nextLessonRow } = await supabase
+    .from('lessons')
+    .select('id')
+    .eq('unit_id', lesson.unit_id)
+    .gt('order_num', lesson.order_num)
+    .order('order_num', { ascending: true })
+    .limit(1)
+    .single()
+
+  const nextLessonHref = nextLessonRow
+    ? `/learn/${subjectSlug}/${unitId}/${nextLessonRow.id}`
+    : '/dashboard'
+
   return (
     <LessonShell
       lesson={lesson}
       initialWeakConcepts={progress?.weak_concepts ?? []}
+      nextLessonHref={nextLessonHref}
     />
   )
 }

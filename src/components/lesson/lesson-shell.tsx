@@ -6,6 +6,7 @@ import { ConceptTab } from './concept-tab'
 import { SimulationTab } from './simulation-tab'
 import { PracticeTab } from './practice-tab'
 import { TutorChat } from './tutor-chat'
+import { completeLessonAction } from '@/app/learn/actions'
 import type { LessonWithProblems } from '@/lib/queries/lessons'
 
 type LeftTab = 'concept' | 'simulation' | 'practice'
@@ -19,9 +20,10 @@ const LEFT_TABS: { id: LeftTab; label: string; icon: React.ReactNode }[] = [
 interface LessonShellProps {
   lesson: LessonWithProblems
   initialWeakConcepts?: string[]
+  nextLessonHref: string
 }
 
-export function LessonShell({ lesson, initialWeakConcepts = [] }: LessonShellProps) {
+export function LessonShell({ lesson, initialWeakConcepts = [], nextLessonHref }: LessonShellProps) {
   const [activeTab, setActiveTab] = useState<LeftTab>('concept')
   const [mobileTab, setMobileTab] = useState<LeftTab | 'tutor'>('concept')
   const [isRead, setIsRead] = useState(false)
@@ -41,6 +43,10 @@ export function LessonShell({ lesson, initialWeakConcepts = [] }: LessonShellPro
       setIsRead(true)
       setXp(prev => prev + lesson.xp_reward)
     }
+  }
+
+  const handleLessonComplete = async (finalXp: number, score: number) => {
+    await completeLessonAction(lesson.id, finalXp, score)
   }
 
   return (
@@ -105,6 +111,8 @@ export function LessonShell({ lesson, initialWeakConcepts = [] }: LessonShellPro
                 lessonTitle={lesson.title}
                 onXpEarned={handleXpEarned}
                 onWeakConceptFound={handleWeakConcept}
+                onComplete={handleLessonComplete}
+                nextLessonHref={nextLessonHref}
               />
             )}
           </div>
@@ -163,6 +171,8 @@ export function LessonShell({ lesson, initialWeakConcepts = [] }: LessonShellPro
               lessonTitle={lesson.title}
               onXpEarned={handleXpEarned}
               onWeakConceptFound={handleWeakConcept}
+              onComplete={handleLessonComplete}
+              nextLessonHref={nextLessonHref}
             />
           )}
           {mobileTab === 'tutor' && (

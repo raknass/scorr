@@ -79,11 +79,47 @@ export async function getUserProgress(
 export async function getUnit1Lessons(): Promise<Lesson[]> {
   const supabase = await createClient()
 
+  // Join through units to scope to AP Physics 1 only
+  const { data: units } = await supabase
+    .from('units')
+    .select('id')
+    .eq('subject_id', (
+      await supabase
+        .from('subjects')
+        .select('id')
+        .eq('slug', 'ap-physics-1')
+        .single()
+    ).data?.id ?? '')
+    .order('order_num', { ascending: true })
+    .limit(1)
+
+  const unitId = units?.[0]?.id
+  if (!unitId) return []
+
   const { data } = await supabase
     .from('lessons')
     .select('*')
+    .eq('unit_id', unitId)
     .order('order_num', { ascending: true })
-    .limit(5)
 
   return data ?? []
+}
+
+export async function markLessonComplete(
+  userId: string,
+  lessonId: string,
+  xpEarned: number,
+  score: number
+): Promise<void> {
+  const supabase = await createClient()
+  await supabase
+    .from('progress')
+    .upsert({
+      user_id: userId,
+      lesson_id: lessonId,
+      completed: true,
+      xp_earned: xpEarned,
+      score,
+      last_seen: new Date().toISOString(),
+    }, { onConflict: 'user_id,lesson_id' })
 }

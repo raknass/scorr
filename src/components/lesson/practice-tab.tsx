@@ -8,6 +8,8 @@ interface PracticeTabProps {
   lessonTitle: string
   onXpEarned: (xp: number) => void
   onWeakConceptFound: (concept: string) => void
+  onComplete: (finalXp: number, score: number) => Promise<void>
+  nextLessonHref: string
 }
 
 type AnswerState = 'idle' | 'correct' | 'wrong' | 'revealed'
@@ -16,6 +18,8 @@ export function PracticeTab({
   problems,
   onXpEarned,
   onWeakConceptFound,
+  onComplete,
+  nextLessonHref,
 }: PracticeTabProps) {
   const [currentIdx, setCurrentIdx] = useState(0)
   const [selected, setSelected] = useState<number | null>(null)
@@ -23,6 +27,8 @@ export function PracticeTab({
   const [explanation, setExplanation] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [completed, setCompleted] = useState<Set<number>>(new Set())
+  const [earnedXp, setEarnedXp] = useState(0)
+  const [saving, setSaving] = useState(false)
 
   const problem = problems[currentIdx]
   const totalProblems = problems.length
@@ -44,7 +50,9 @@ export function PracticeTab({
       if (data.correct) {
         setAnswerState('correct')
         setCompleted(prev => new Set(prev).add(currentIdx))
-        onXpEarned(5)
+        const gained = 5
+        setEarnedXp(prev => prev + gained)
+        onXpEarned(gained)
       } else {
         setAnswerState('wrong')
         if (problem.concept) onWeakConceptFound(problem.concept)
@@ -76,17 +84,36 @@ export function PracticeTab({
   const allDone = currentIdx >= totalProblems
 
   if (allDone) {
+    // Fire completion save once when screen first shows
+    const handleFinish = async () => {
+      setSaving(true)
+      await onComplete(earnedXp, completedCount)
+      setSaving(false)
+      window.location.href = nextLessonHref
+    }
+
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 px-6 text-center">
         <div className="text-5xl">🎉</div>
-        <h3 className="text-xl font-bold text-slate-800">All {totalProblems} problems done!</h3>
-        <p className="text-slate-500 text-sm">You got {completedCount} of {totalProblems} correct on first try.</p>
-        <button
-          onClick={() => { setCurrentIdx(0); setCompleted(new Set()); setAnswerState('idle'); setSelected(null) }}
-          className="mt-2 px-6 py-2.5 bg-teal-600 text-white rounded-lg text-sm font-semibold hover:bg-teal-700"
-        >
-          Practice Again
-        </button>
+        <h3 className="text-xl font-bold text-slate-800">Lesson Complete!</h3>
+        <p className="text-slate-500 text-sm">
+          You got <span className="font-bold text-teal-600">{completedCount}</span> of {totalProblems} correct · +{earnedXp} XP
+        </p>
+        <div className="flex flex-col gap-2 w-full max-w-xs">
+          <button
+            onClick={handleFinish}
+            disabled={saving}
+            className="w-full py-3 bg-teal-600 text-white rounded-xl text-sm font-semibold hover:bg-teal-700 disabled:opacity-50 transition-all"
+          >
+            {saving ? 'Saving…' : nextLessonHref === '/dashboard' ? '← Back to Dashboard' : 'Next Lesson →'}
+          </button>
+          <button
+            onClick={() => { setCurrentIdx(0); setCompleted(new Set()); setAnswerState('idle'); setSelected(null); setEarnedXp(0) }}
+            className="w-full py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm font-medium hover:bg-slate-50"
+          >
+            Practice Again
+          </button>
+        </div>
       </div>
     )
   }
