@@ -76,15 +76,10 @@ export function PracticeTab({
     setAnswerState('revealed')
   }
 
-  const isFRQ = problem?.question.startsWith('[FRQ]')
-  const options: string[] = isFRQ ? [] : (problem?.options ?? [])
-
-  if (!problem) return null
-
+  // ── Completion screen: must check BEFORE the null guard below ──────────────
   const allDone = currentIdx >= totalProblems
 
   if (allDone) {
-    // Fire completion save once when screen first shows
     const handleFinish = async () => {
       setSaving(true)
       await onComplete(earnedXp, completedCount)
@@ -117,6 +112,12 @@ export function PracticeTab({
       </div>
     )
   }
+
+  // ── Problem not loaded yet (safety guard) ──────────────────────────────────
+  const isFRQ = problem?.question.startsWith('[FRQ]')
+  const options: string[] = isFRQ ? [] : (problem?.options ?? [])
+
+  if (!problem) return null
 
   return (
     <div className="flex flex-col h-full">
