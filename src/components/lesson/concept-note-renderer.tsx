@@ -6,6 +6,7 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
 import type { Components } from 'react-markdown'
+import { getDiagramForSection, LessonDiagram } from './lesson-diagrams'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -498,6 +499,7 @@ export function ConceptNoteRenderer({
     h2: ({ children }) => {
       const text = typeof children === 'string' ? children : String(children ?? '')
       const ctx = detectH2Context(text)
+      const diagramKey = getDiagramForSection(text)
 
       // Reset all flags
       ctxRef.current.inWorkedExample = ctx === 'worked-example'
@@ -507,75 +509,86 @@ export function ConceptNoteRenderer({
       ctxRef.current.inKeyFormula = ctx === 'key-formula'
       ctxRef.current.currentSection = ctx
 
+      const diagram = diagramKey ? <LessonDiagram id={diagramKey} /> : null
+
       // AP Exam Traps header
       if (ctx === 'ap-exam-traps') {
         return (
-          <div
-            style={{
-              borderLeft: '4px solid #F59E0B',
-              background: '#FFFBEB',
-              padding: '10px 16px',
-              marginTop: '24px',
-              marginBottom: '12px',
-              borderRadius: '0 8px 8px 0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
-            <span style={{ fontSize: '16px' }}>⚠️</span>
-            <span style={{ color: '#92400E', fontWeight: 700, fontSize: '15px', letterSpacing: '0.02em' }}>
-              {text}
-            </span>
-          </div>
+          <>
+            <div
+              style={{
+                borderLeft: '4px solid #F59E0B',
+                background: '#FFFBEB',
+                padding: '10px 16px',
+                marginTop: '24px',
+                marginBottom: '12px',
+                borderRadius: '0 8px 8px 0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <span style={{ fontSize: '16px' }}>⚠️</span>
+              <span style={{ color: '#92400E', fontWeight: 700, fontSize: '15px', letterSpacing: '0.02em' }}>
+                {text}
+              </span>
+            </div>
+            {diagram}
+          </>
         )
       }
 
       // Self-Check header
       if (ctx === 'self-check') {
         return (
-          <div
-            style={{
-              borderLeft: '4px solid #3B82F6',
-              background: '#EFF6FF',
-              padding: '10px 16px',
-              marginTop: '24px',
-              marginBottom: '12px',
-              borderRadius: '0 8px 8px 0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
-            <span style={{ fontSize: '16px' }}>🧠</span>
-            <span style={{ color: '#1E40AF', fontWeight: 700, fontSize: '15px' }}>
-              {text}
-            </span>
-          </div>
+          <>
+            <div
+              style={{
+                borderLeft: '4px solid #3B82F6',
+                background: '#EFF6FF',
+                padding: '10px 16px',
+                marginTop: '24px',
+                marginBottom: '12px',
+                borderRadius: '0 8px 8px 0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <span style={{ fontSize: '16px' }}>🧠</span>
+              <span style={{ color: '#1E40AF', fontWeight: 700, fontSize: '15px' }}>
+                {text}
+              </span>
+            </div>
+            {diagram}
+          </>
         )
       }
 
       // Key Formula header
       if (ctx === 'key-formula') {
         return (
-          <div
-            style={{
-              borderLeft: '4px solid #0D9488',
-              background: '#F8FAFC',
-              padding: '10px 16px',
-              marginTop: '24px',
-              marginBottom: '4px',
-              borderRadius: '0 8px 8px 0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
-            <span style={{ fontSize: '16px' }}>📐</span>
-            <span style={{ color: '#0F172A', fontWeight: 700, fontSize: '15px' }}>
-              {text}
-            </span>
-          </div>
+          <>
+            <div
+              style={{
+                borderLeft: '4px solid #0D9488',
+                background: '#F8FAFC',
+                padding: '10px 16px',
+                marginTop: '24px',
+                marginBottom: '4px',
+                borderRadius: '0 8px 8px 0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <span style={{ fontSize: '16px' }}>📐</span>
+              <span style={{ color: '#0F172A', fontWeight: 700, fontSize: '15px' }}>
+                {text}
+              </span>
+            </div>
+            {diagram}
+          </>
         )
       }
 
@@ -583,135 +596,152 @@ export function ConceptNoteRenderer({
       if (ctx === 'worked-example') {
         workedExampleCounter++
         return (
-          <div
-            style={{
-              background: '#0D9488',
-              padding: '10px 16px',
-              marginTop: '24px',
-              marginBottom: '0',
-              borderRadius: '12px 12px 0 0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
-            <span
+          <>
+            <div
               style={{
-                background: 'rgba(255,255,255,0.2)',
-                borderRadius: '50%',
-                width: '22px',
-                height: '22px',
-                display: 'inline-flex',
+                background: '#0D9488',
+                padding: '10px 16px',
+                marginTop: '24px',
+                marginBottom: '0',
+                borderRadius: '12px 12px 0 0',
+                display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '11px',
-                color: '#fff',
-                fontWeight: 700,
+                gap: '8px',
               }}
             >
-              {workedExampleCounter}
-            </span>
-            <span style={{ color: '#fff', fontWeight: 600, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              {text}
-            </span>
-          </div>
+              <span
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  borderRadius: '50%',
+                  width: '22px',
+                  height: '22px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '11px',
+                  color: '#fff',
+                  fontWeight: 700,
+                }}
+              >
+                {workedExampleCounter}
+              </span>
+              <span style={{ color: '#fff', fontWeight: 600, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                {text}
+              </span>
+            </div>
+            {diagram}
+          </>
         )
       }
 
       // Connection header
       if (ctx === 'connection') {
         return (
-          <div
-            style={{
-              borderLeft: '4px solid #6B7280',
-              background: '#F3F4F6',
-              padding: '10px 16px',
-              marginTop: '24px',
-              marginBottom: '12px',
-              borderRadius: '0 8px 8px 0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
-            <span style={{ fontSize: '16px' }}>🔗</span>
-            <span style={{ color: '#111827', fontWeight: 700, fontSize: '15px' }}>
-              {text}
-            </span>
-          </div>
+          <>
+            <div
+              style={{
+                borderLeft: '4px solid #6B7280',
+                background: '#F3F4F6',
+                padding: '10px 16px',
+                marginTop: '24px',
+                marginBottom: '12px',
+                borderRadius: '0 8px 8px 0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <span style={{ fontSize: '16px' }}>🔗</span>
+              <span style={{ color: '#111827', fontWeight: 700, fontSize: '15px' }}>
+                {text}
+              </span>
+            </div>
+            {diagram}
+          </>
         )
       }
 
       // Default H2
       return (
-        <div
-          style={{
-            borderLeft: '4px solid #0D9488',
-            background: '#F8FAFC',
-            padding: '10px 16px',
-            marginTop: '24px',
-            marginBottom: '12px',
-            borderRadius: '0 8px 8px 0',
-          }}
-        >
-          <span style={{ color: '#0F172A', fontWeight: 600, fontSize: '16px' }}>
-            {children}
-          </span>
-        </div>
+        <>
+          <div
+            style={{
+              borderLeft: '4px solid #0D9488',
+              background: '#F8FAFC',
+              padding: '10px 16px',
+              marginTop: '24px',
+              marginBottom: '12px',
+              borderRadius: '0 8px 8px 0',
+            }}
+          >
+            <span style={{ color: '#0F172A', fontWeight: 600, fontSize: '16px' }}>
+              {children}
+            </span>
+          </div>
+          {diagram}
+        </>
       )
     },
 
     // ── H3 — sub-headings ────────────────────────────────────────────────────
     h3: ({ children }) => {
       const text = typeof children === 'string' ? children : String(children ?? '')
+      const diagramKey = getDiagramForSection(text)
+      const diagram = diagramKey ? <LessonDiagram id={diagramKey} /> : null
 
       if (isTrapH3(text)) {
         return (
-          <div
-            style={{
-              borderLeft: '4px solid #F59E0B',
-              background: '#FFFBEB',
-              padding: '10px 14px',
-              marginBottom: '10px',
-              marginTop: '8px',
-              borderRadius: '0 8px 8px 0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
-            <span style={{ fontSize: '14px' }}>⚠️</span>
-            <span style={{ color: '#92400E', fontWeight: 600, fontSize: '14px' }}>
-              {children}
-            </span>
-          </div>
+          <>
+            <div
+              style={{
+                borderLeft: '4px solid #F59E0B',
+                background: '#FFFBEB',
+                padding: '10px 14px',
+                marginBottom: '10px',
+                marginTop: '8px',
+                borderRadius: '0 8px 8px 0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <span style={{ fontSize: '14px' }}>⚠️</span>
+              <span style={{ color: '#92400E', fontWeight: 600, fontSize: '14px' }}>
+                {children}
+              </span>
+            </div>
+            {diagram}
+          </>
         )
       }
 
       return (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            marginTop: '16px',
-            marginBottom: '8px',
-          }}
-        >
-          <span
+        <>
+          <div
             style={{
-              display: 'inline-block',
-              width: '8px',
-              height: '8px',
-              background: '#0D9488',
-              borderRadius: '50%',
-              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginTop: '16px',
+              marginBottom: '8px',
             }}
-          />
-          <span style={{ color: '#0F172A', fontWeight: 600, fontSize: '14px' }}>
-            {children}
-          </span>
-        </div>
+          >
+            <span
+              style={{
+                display: 'inline-block',
+                width: '8px',
+                height: '8px',
+                background: '#0D9488',
+                borderRadius: '50%',
+                flexShrink: 0,
+              }}
+            />
+            <span style={{ color: '#0F172A', fontWeight: 600, fontSize: '14px' }}>
+              {children}
+            </span>
+          </div>
+          {diagram}
+        </>
       )
     },
 
