@@ -89,10 +89,12 @@ export function LessonShell({
   const handleWeakConcept = (concept: string) =>
     setWeakConcepts(prev => prev.includes(concept) ? prev : [...prev, concept])
 
-  const handleMarkRead = () => {
+  const handleMarkRead = async () => {
     if (!isRead) {
       setIsRead(true)
-      setXp(prev => prev + lesson.xp_reward)
+      const newXp = xp + lesson.xp_reward
+      setXp(newXp)
+      await completeLessonAction(lesson.id, newXp, 100)
     }
   }
 

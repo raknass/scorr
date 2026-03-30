@@ -24,5 +24,6 @@ export async function completeLessonAction(
     }, { onConflict: 'user_id,lesson_id' })
 
   revalidatePath('/dashboard')
+  revalidatePath('/learn', 'layout')
   return { ok: true }
 }

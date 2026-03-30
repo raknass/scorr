@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
+import remarkGfm from 'remark-gfm'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
 import type { Components } from 'react-markdown'
@@ -939,12 +940,14 @@ export function ConceptNoteRenderer({
     // ── Tables ───────────────────────────────────────────────────────────────
     table: ({ children }) => (
       <div
+        className="cnr-card-white"
         style={{
+          background: '#fff',
           borderRadius: '8px',
           overflow: 'hidden',
           border: '0.5px solid #E5E7EB',
           margin: '16px 0',
-          fontSize: '13px',
+          fontSize: '14px',
         }}
       >
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -958,7 +961,7 @@ export function ConceptNoteRenderer({
     ),
 
     tr: ({ children }) => (
-      <tr
+      <tr className="cnr-tr"
         style={{
           borderBottom: '0.5px solid #E5E7EB',
         }}
@@ -976,7 +979,7 @@ export function ConceptNoteRenderer({
           fontWeight: 600,
           textAlign: 'left',
           color: '#fff',
-          fontSize: '12px',
+          fontSize: '13px',
           letterSpacing: '0.04em',
         }}
       >
@@ -1076,6 +1079,8 @@ export function ConceptNoteRenderer({
           from { opacity: 0; transform: translateY(-6px); }
           to   { opacity: 1; transform: translateY(0); }
         }
+        .cnr-tr:nth-child(even) { background: #F9FAFB; }
+        .cnr-tr:nth-child(odd) { background: #fff; }
         @media (prefers-color-scheme: dark) {
           .cnr-card-white   { background: #1E293B !important; }
           .cnr-bg-gray      { background: #1E293B !important; }
@@ -1086,7 +1091,7 @@ export function ConceptNoteRenderer({
       {/* Main content */}
       <div style={{ padding: '0 0 8px 0' }}>
         <ReactMarkdown
-          remarkPlugins={[remarkMath]}
+          remarkPlugins={[remarkMath, remarkGfm]}
           rehypePlugins={[rehypeKatex]}
           components={components}
         >

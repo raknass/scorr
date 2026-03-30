@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { ConceptNoteRenderer } from './concept-note-renderer'
 
 interface ConceptTabProps {
@@ -21,9 +21,28 @@ export function ConceptTab({
   onNavigateToPractice,
 }: ConceptTabProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [scrollProgress, setScrollProgress] = useState(0)
+
+  useEffect(() => {
+    const container = scrollRef.current
+    if (!container) return
+
+    const handleScroll = () => {
+      const scrollTop = container.scrollTop
+      const scrollHeight = container.scrollHeight - container.clientHeight
+      if (scrollHeight > 0) {
+        setScrollProgress(Math.round((scrollTop / scrollHeight) * 100))
+      }
+    }
+
+    container.addEventListener('scroll', handleScroll, { passive: true })
+    return () => container.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const canMarkRead = isRead || scrollProgress >= 80
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-[#FAFAFA]">
       {/* ── Header bar ── */}
       <div
         style={{
@@ -39,23 +58,6 @@ export function ConceptTab({
         <span style={{ fontSize: '12px', color: '#64748B', fontWeight: 500 }}>
           ⏱ {estimatedMinutes} min read
         </span>
-        <button
-          onClick={onMarkRead}
-          disabled={isRead}
-          style={{
-            padding: '6px 18px',
-            borderRadius: '99px',
-            fontSize: '12px',
-            fontWeight: 600,
-            border: 'none',
-            cursor: isRead ? 'default' : 'pointer',
-            background: isRead ? '#CCFBF1' : '#0D9488',
-            color: isRead ? '#0F766E' : '#fff',
-            transition: 'all 0.2s ease',
-          }}
-        >
-          {isRead ? '✓ Marked as Read' : 'Mark as Read'}
-        </button>
       </div>
 
       {/* ── Scrollable content ── */}
@@ -66,6 +68,7 @@ export function ConceptTab({
           overflowY: 'auto',
           padding: '0 24px 32px',
           scrollBehavior: 'smooth',
+          background: '#fff',
         }}
       >
         <ConceptNoteRenderer
@@ -74,6 +77,30 @@ export function ConceptTab({
           onNavigateToPractice={onNavigateToPractice}
           scrollContainerRef={scrollRef}
         />
+
+        {/* ── Mark as Read Button ── */}
+        <div style={{ marginTop: '30px', paddingBottom: '20px', display: 'flex', justifyContent: 'center' }}>
+          <button
+            onClick={onMarkRead}
+            disabled={isRead || !canMarkRead}
+            style={{
+              width: '100%',
+              maxWidth: '300px',
+              padding: '14px 24px',
+              borderRadius: '12px',
+              fontSize: '15px',
+              fontWeight: 700,
+              border: 'none',
+              cursor: (isRead || !canMarkRead) ? 'default' : 'pointer',
+              background: isRead ? '#F0FDFA' : canMarkRead ? '#0D9488' : '#F1F5F9',
+              color: isRead ? '#0F766E' : canMarkRead ? '#fff' : '#94A3B8',
+              boxShadow: (canMarkRead && !isRead) ? '0 4px 12px rgba(13,148,136,0.2)' : 'none',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            {isRead ? '✓ Marked as Read' : canMarkRead ? 'Mark as Read' : `Read more to complete (${scrollProgress}%)`}
+          </button>
+        </div>
       </div>
     </div>
   )

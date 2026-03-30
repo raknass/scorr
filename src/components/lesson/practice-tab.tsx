@@ -164,15 +164,15 @@ export function PracticeTab({
         {!isFRQ && (
           <div className="space-y-2.5">
             {options.map((opt, i) => {
-              let optionStyle = 'border-slate-200 bg-white hover:border-teal-400 hover:bg-teal-50'
+              let optionStyle = 'border-slate-200 bg-white hover:border-teal-400 hover:bg-teal-50 text-[#1F2937]'
               if (selected === i && answerState === 'idle') {
                 optionStyle = 'border-teal-500 bg-teal-50 text-teal-800'
               } else if (answerState !== 'idle' && answerState !== 'wrong') {
                 // Show correct answer
-                optionStyle = 'border-slate-200 bg-white cursor-default'
+                optionStyle = 'border-slate-200 bg-white cursor-default text-[#1F2937]'
               } else if (answerState === 'wrong') {
-                if (selected === i) optionStyle = 'border-red-400 bg-red-50 cursor-default'
-                else optionStyle = 'border-slate-200 bg-white cursor-default'
+                if (selected === i) optionStyle = 'border-red-400 bg-red-50 cursor-default text-red-900'
+                else optionStyle = 'border-slate-200 bg-white cursor-default text-[#1F2937]'
               }
 
               return (
