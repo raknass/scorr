@@ -100,6 +100,8 @@ export function LessonShell({ lesson, initialWeakConcepts = [], nextLessonHref }
                 estimatedMinutes={lesson.estimated_minutes}
                 onMarkRead={handleMarkRead}
                 isRead={isRead}
+                onNavigateToSim={() => setActiveTab('simulation')}
+                onNavigateToPractice={() => setActiveTab('practice')}
               />
             )}
             {activeTab === 'simulation' && (
@@ -160,6 +162,8 @@ export function LessonShell({ lesson, initialWeakConcepts = [], nextLessonHref }
               estimatedMinutes={lesson.estimated_minutes}
               onMarkRead={handleMarkRead}
               isRead={isRead}
+              onNavigateToSim={() => setMobileTab('simulation')}
+              onNavigateToPractice={() => setMobileTab('practice')}
             />
           )}
           {mobileTab === 'simulation' && (
