@@ -10,6 +10,9 @@ export type Lesson = {
   xp_reward: number
   order_num: number
   unit_id: string
+  podcast_url: string | null
+  podcast_duration: string | null
+  podcast_transcript: string | null
 }
 
 export type Problem = {
@@ -33,7 +36,29 @@ export type UserProgress = {
   weak_concepts: string[]
 }
 
-export type LessonWithProblems = Lesson & { problems: Problem[] }
+export type RubricCriterion = {
+  criterion: string
+  points: number
+}
+
+export type PastExamQuestion = {
+  id: string
+  lesson_id: string
+  year: number
+  exam_type: string
+  question_ref: string
+  points: number
+  difficulty: 'easy' | 'medium' | 'hard'
+  question_text: string
+  diagram_url: string | null
+  rubric: RubricCriterion[]
+  created_at: string
+}
+
+export type LessonWithProblems = Lesson & {
+  problems: Problem[]
+  pastExamQuestions: PastExamQuestion[]
+}
 
 export async function getLessonWithProblems(
   lessonId: string
@@ -57,7 +82,18 @@ export async function getLessonWithProblems(
 
   if (probError) return null
 
-  return { ...lesson, problems: problems ?? [] }
+  // Fetch past exam questions for this lesson
+  const { data: pastExamQuestions } = await supabase
+    .from('past_exam_questions')
+    .select('*')
+    .eq('lesson_id', lessonId)
+    .order('year', { ascending: false })
+
+  return {
+    ...lesson,
+    problems: problems ?? [],
+    pastExamQuestions: (pastExamQuestions ?? []) as PastExamQuestion[],
+  }
 }
 
 export async function getUserProgress(

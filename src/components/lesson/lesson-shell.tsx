@@ -1,13 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { BookOpen, Zap, Trophy, MessageCircle } from 'lucide-react'
+import { BookOpen, Zap, Trophy, MessageCircle, Headphones, GraduationCap } from 'lucide-react'
 import { LessonHeader } from './lesson-header'
 import { LessonSidebar } from './lesson-sidebar'
 import { LessonNav } from './lesson-nav'
 import { ConceptTab } from './concept-tab'
 import { SimulationTab } from './simulation-tab'
 import { PracticeTab } from './practice-tab'
+import { PodcastTab } from './podcast-tab'
+import { PastExamsTab } from './past-exams-tab'
 import { TutorChat } from './tutor-chat'
 import { completeLessonAction } from '@/app/learn/actions'
 import type { LessonWithProblems } from '@/lib/queries/lessons'
@@ -15,12 +17,14 @@ import type { CourseStructure } from '@/lib/queries/course'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type LeftTab = 'concept' | 'simulation' | 'practice'
+type LeftTab = 'concept' | 'simulation' | 'practice' | 'past-exams' | 'podcast'
 
 const LEFT_TABS: { id: LeftTab; label: string; icon: React.ReactNode }[] = [
   { id: 'concept',    label: 'Concept',    icon: <BookOpen size={13} /> },
   { id: 'simulation', label: 'Simulation', icon: <Zap size={13} /> },
   { id: 'practice',  label: 'Practice',   icon: <Trophy size={13} /> },
+  { id: 'past-exams', label: 'Past Exams', icon: <GraduationCap size={13} /> },
+  { id: 'podcast',   label: 'Podcast',    icon: <Headphones size={13} /> },
 ]
 
 interface LessonShellProps {
@@ -53,6 +57,7 @@ export function LessonShell({
   // ── State ──────────────────────────────────────────────────────────────────
   const [activeTab, setActiveTab]     = useState<LeftTab>('concept')
   const [mobileTab, setMobileTab]     = useState<LeftTab | 'tutor'>('concept')
+  const [tutorSeedMessage, setTutorSeedMessage] = useState<string | undefined>(undefined)
   const [isRead,    setIsRead]        = useState(false)
   const [xp,        setXp]            = useState(0)
   const [weakConcepts, setWeakConcepts] = useState<string[]>(initialWeakConcepts)
@@ -100,6 +105,13 @@ export function LessonShell({
 
   const handleLessonComplete = async (finalXp: number, score: number) => {
     await completeLessonAction(lesson.id, finalXp, score)
+  }
+
+  const handleAskTutor = (context: string) => {
+    setTutorSeedMessage(context)
+    // On desktop switch to the tutor panel is automatic (it's always visible)
+    // On mobile navigate to tutor tab
+    setMobileTab('tutor')
   }
 
   // ── Derived data ───────────────────────────────────────────────────────────
@@ -243,6 +255,26 @@ export function LessonShell({
                   <LessonNav {...navProps} />
                 </div>
               )}
+              {activeTab === 'past-exams' && (
+                <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ flex: 1, overflow: 'hidden' }}>
+                    <PastExamsTab
+                      questions={lesson.pastExamQuestions}
+                      lessonTitle={lesson.title}
+                      onAskTutor={handleAskTutor}
+                    />
+                  </div>
+                  <LessonNav {...navProps} />
+                </div>
+              )}
+              {activeTab === 'podcast' && (
+                <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ flex: 1, overflow: 'hidden' }}>
+                    <PodcastTab lesson={lesson} />
+                  </div>
+                  <LessonNav {...navProps} />
+                </div>
+              )}
             </div>
           </div>
 
@@ -256,6 +288,8 @@ export function LessonShell({
               apTopic={lesson.ap_topic}
               weakConcepts={weakConcepts}
               activeTab={activeTab}
+              seedMessage={tutorSeedMessage}
+              onSeedConsumed={() => setTutorSeedMessage(undefined)}
             />
           </div>
         </div>
@@ -330,13 +364,35 @@ export function LessonShell({
                 <LessonNav {...navProps} />
               </div>
             )}
+            {mobileTab === 'past-exams' && (
+              <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ flex: 1, overflow: 'hidden' }}>
+                  <PastExamsTab
+                    questions={lesson.pastExamQuestions}
+                    lessonTitle={lesson.title}
+                    onAskTutor={handleAskTutor}
+                  />
+                </div>
+                <LessonNav {...navProps} />
+              </div>
+            )}
+            {mobileTab === 'podcast' && (
+              <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ flex: 1, overflow: 'hidden' }}>
+                  <PodcastTab lesson={lesson} />
+                </div>
+                <LessonNav {...navProps} />
+              </div>
+            )}
             {mobileTab === 'tutor' && (
               <div style={{ flex: 1, overflow: 'hidden' }}>
                 <TutorChat
                   lessonTitle={lesson.title}
                   apTopic={lesson.ap_topic}
                   weakConcepts={weakConcepts}
-                  activeTab="concept"
+                  activeTab={mobileTab === 'tutor' ? 'concept' : (mobileTab as LeftTab)}
+                  seedMessage={tutorSeedMessage}
+                  onSeedConsumed={() => setTutorSeedMessage(undefined)}
                 />
               </div>
             )}

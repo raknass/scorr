@@ -12,13 +12,18 @@ interface TutorChatProps {
   lessonTitle: string
   apTopic: string
   weakConcepts: string[]
-  activeTab: 'concept' | 'simulation' | 'practice'
+  activeTab: 'concept' | 'simulation' | 'practice' | 'past-exams' | 'podcast'
+  /** Pre-fill and auto-send this message (from Past Exams 'Ask Tutor' button) */
+  seedMessage?: string
+  onSeedConsumed?: () => void
 }
 
 const TAB_CONTEXT: Record<string, string> = {
   concept: 'reading the concept note',
   simulation: 'using the interactive simulation',
   practice: 'working through practice problems',
+  'past-exams': 'grading a past AP exam free-response question',
+  podcast: 'listening to the lesson podcast',
 }
 
 export function TutorChat({
@@ -26,6 +31,8 @@ export function TutorChat({
   apTopic,
   weakConcepts,
   activeTab,
+  seedMessage,
+  onSeedConsumed,
 }: TutorChatProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
@@ -33,6 +40,43 @@ export function TutorChat({
   const [remaining, setRemaining] = useState<number | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // Consume seedMessage: auto-send once when provided
+  const hasSentSeed = useRef(false)
+  useEffect(() => {
+    if (seedMessage && !hasSentSeed.current) {
+      hasSentSeed.current = true
+      setInput(seedMessage)
+      // slight delay so the input state settles before we call send
+      setTimeout(() => {
+        // fire send via the form-like approach rather than calling send() directly
+        // to avoid closure issues — update input and trigger manually
+        const question = seedMessage.trim()
+        if (!question || remaining === 0) return
+        const tabCtx = TAB_CONTEXT[activeTab] ?? 'studying'
+        const userMessage: Message = { role: 'user', content: question }
+        setMessages(prev => [...prev, userMessage])
+        setInput('')
+        setLoading(true)
+        onSeedConsumed?.()
+        hasSentSeed.current = false
+
+        fetch('/api/tutor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lessonTitle, apTopic, weakConcepts, studentQuestion: question, activeContext: `Student is currently ${tabCtx}.` }),
+        })
+          .then(r => r.json())
+          .then(data => {
+            setMessages(prev => [...prev, { role: 'assistant', content: data.answer ?? data.message ?? 'Sorry, something went wrong.' }])
+            if (data.remaining !== undefined) setRemaining(data.remaining)
+          })
+          .catch(() => setMessages(prev => [...prev, { role: 'assistant', content: 'Network error. Try again.' }]))
+          .finally(() => setLoading(false))
+      }, 80)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seedMessage])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
